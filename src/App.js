@@ -11,6 +11,30 @@ function App() {
   const [selectedOptions, setSelectedOptions] = useState(Array(questionData.length).fill(null));
   const [intervalId, setIntervalId] = useState(null);
 
+ 
+  const handleOptionSelect = (questionIndex, optionIndex) => {
+    setQuestionData((prevData) => {
+      const updatedData = prevData.map((question, index) => {
+        if (index === questionIndex && question.selectedOption === null) {
+          const startTime = timer; // Capture the start time when the option is selected
+          return {
+            ...question,
+            selectedOption: optionIndex,
+            startTime: startTime,
+          };
+        }
+        return question;
+      });
+      return updatedData;
+    });
+
+    setSelectedOptions((prevOptions) => {
+      const updatedOptions = [...prevOptions];
+      updatedOptions[questionIndex] = optionIndex;
+      return updatedOptions;
+    });
+  };
+
   useEffect(() => {
     let interval = setInterval(() => {
       setTimer((prevTimer) => prevTimer + 1);
@@ -20,38 +44,20 @@ function App() {
 
     // Clean up the interval when the component unmounts
     return () => clearInterval(interval);
-  }, []); 
-
-  const handleOptionSelect = (questionIndex, optionIndex) => {
-    setQuestionData((prevData) => {
-      const updatedData = prevData.map((question, index) => {
-        if (index === questionIndex && question.selectedOption === null) {
-          return {
-            ...question,
-            selectedOption: optionIndex,
-            startTime: timer,
-          };
-        }
-        return question;
-      });
-      return updatedData;
-    });
-    setSelectedOptions((prevOptions) => {
-      const updatedOptions = [...prevOptions];
-      updatedOptions[questionIndex] = optionIndex;
-      return updatedOptions;
-    });
-  };
+  }, []);
 
   const handleSave = () => {
     clearInterval(intervalId);
     alert(`Total time taken for all questions: ${timer} seconds`);
 
     questionData.forEach((question, questionIndex) => {
-      const timeElapsed = question.selectedOption !== null ? timer - question.startTime : 0;
-      alert(`Time taken for Question ${questionIndex + 1}: ${timeElapsed} seconds`);
+      const timeElapsed = question.startTime !== undefined ? question.startTime : 0;
+      alert(`Time when checkbox clicked for Question ${questionIndex + 1}: ${timeElapsed} seconds`);
     });
   };
+
+  
+
 
   return (
     <div className="App">
